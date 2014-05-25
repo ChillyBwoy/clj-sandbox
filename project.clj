@@ -9,9 +9,9 @@
   :source-paths ["src/clj" "src/cljs"]
   :plugins [[lein-cljsbuild "1.0.3"]]
   :cljsbuild {:builds
-              [{
-                :source-paths ["src/cljs"]
-                :compiler {
-                           :output-to "resources/public/javascripts/app.js"
-                           :optimizations :whitespace
-                           :pretty-print true}}]})
+              [{:source-paths ["src/cljs/sandbox/apps"]
+                :compiler
+                {:output-dir "resources/public/javascripts"
+                 :output-to "resources/public/javascripts/app.js"
+                 :pretty-print false
+                 :source-map "resources/public/javascripts/app.js.map"}}]})
