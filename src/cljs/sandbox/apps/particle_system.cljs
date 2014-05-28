@@ -1,70 +1,46 @@
 (ns sandbox.apps.particle-system
-  (:require [sandbox.lib.geom.particle :as pt]
-            [sandbox.lib.geom.emitter :as em]
-            [sandbox.lib.geom.vector2d :as v2]
-            [sandbox.lib.math :as math]))
+  (:require [sandbox.lib.canvas :as canvas]
+            [sandbox.lib.geom.vector2d :refer [vector2d from-angle]]
+            [sandbox.lib.geom.emitter :refer [emitter emit-particle-range]]
+            [sandbox.lib.geom.particle :refer [move-particle]]))
 
-(def display (.getElementById js/document "display"))
-(def context (.getContext display "2d"))
-(def max-particles 100)
-(def particle-size 2)
+(enable-console-print!)
 
-(def app-state (atom {:width (.-innerWidth js/window)
-                      :height (.-innerHeight js/window)
-                      :particles []
-                      :emitters []}))
+(def ^:private app-state (atom {:width (.-innerWidth js/window)
+                                :height (.-innerHeight js/window)
+                                :emitters [(emitter (vector2d 100 230) (from-angle 0 2))]
+                                :particles []}))
 
-(defn init []
-  (let [{:keys [width height]} @app-state]
-    (do
-      (set! (.-width display) width)
-      (set! (.-height display) height)
-      (swap! app-state assoc :emitters
-             [(em/emitter (v2/vector2d 100 230) (v2/from-angle 0 2))]))))
+(defn- draw-particle [ctx {{x :x y :y} :pos color :color size :size :as p}]
+  (set! (.-fillStyle ctx) color)
+  (.fillRect ctx x y size size)
+  p)
 
+(defn- is-in-bounds [{{x :x y :y} :pos} bounds-x bounds-y]
+  (and (> x 0) (< x bounds-x) (> y 0) (< y bounds-y)))
 
-(defn add-particles []
-  (let [{:keys [particles emitters]} @app-state]
-    (when (< (count particles) max-particles)
-      (let [new-particles (vec (flatten (map em/emit-range emitters)))]
-        (swap! app-state assoc :particles (flatten (conj particles new-particles)))))))
+(defn- plot-particles [particles bounds-x bounds-y]
+  (let [visible-particles (vec (filter #(is-in-bounds % bounds-x bounds-y) particles))]
 
-(defn plot-particles [bounds-x bounds-y]
-  (let [new-particles (vec (map (fn [p]
-                                  (let [{{x :x, y :y} :pos} p]
-                                    (when (and (> x 0) (< x bounds-x) (> y 0) (< y bounds-y))
-                                      (pt/move p)))) (:particles @app-state)))]
-    (swap! app-state assoc :particles new-particles)))
+    (let [new-particles (vec (map move-particle visible-particles))]
+      (swap! app-state assoc :particles new-particles))))
 
-(defn draw-circle [ctx obj]
-  (let [{:keys [pos color size]} obj
-        {:keys [x y]} pos]
-    (set! (.-fillStyle ctx) color)
-    (.beginPath ctx)
-    (.arc ctx x y size 0 (* math/PI 2))
-    (.closePath ctx)
-    (.fill ctx)))
+(defn- add-particles [emitters particles max-particles]
+  (when (< (count particles) max-particles)
+    (let [new-particles (vec (flatten (vec (map emit-particle-range emitters))))]
+      (swap! app-state assoc :particles (vec (flatten (conj particles new-particles)))))))
 
-(defn draw-particles [ctx]
-  (doseq [p (:particles @app-state)]
-    (let [{:keys [pos color]} p]
-      (do
-        (set! (.-fillStyle ctx) color)
-        (.fillRect ctx (:x pos) (:y pos) particle-size particle-size)))))
-
-(defn update [width height]
-  (add-particles)
-  (plot-particles width height))
-
-(defn render []
-  ;;(.requestAnimationFrame js/window render)
-  (let [{:keys [width height emitters]} @app-state]
-    (.clearRect context 0 0 width height)
-    (update width height)
-    (doseq [em emitters]
-      (draw-circle context em))
-    (draw-particles context)))
+(defn- render [ctx]
+  (.requestAnimationFrame js/window #(render ctx))
+  (let [{:keys [width height emitters particles]} @app-state]
+    (.clearRect ctx 0 0 width height)
+    (add-particles emitters particles 200)
+    (plot-particles particles width height)
+    ;;(doseq [p particles]
+    ;;  (print p))
+    (map draw-particle particles)))
 
 (defn ^:export run []
-  (init)
-  (render))
+  (print "start")
+  (let [context (canvas/init "display")]
+    (render context)))

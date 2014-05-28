@@ -7,11 +7,23 @@
                  [org.clojure/clojurescript "0.0-2197"]]
 
   :source-paths ["src/clj" "src/cljs"]
-  :plugins [[lein-cljsbuild "1.0.3"]]
+  :plugins [[lein-cljsbuild "1.0.3"]
+            [com.cemerick/clojurescript.test "0.3.1"]]
+  :aliases {"auto-test" ["do" "clean," "cljsbuild" "auto" "test"]}
   :cljsbuild {:builds
-              [{:source-paths ["src/cljs/sandbox/apps"]
+              {:apps
+               {:source-paths ["src/cljs/sandbox/apps"]
                 :compiler
-                {:output-dir "resources/public/javascripts"
+                {:output-dir "resources/public/javascripts/target"
                  :output-to "resources/public/javascripts/app.js"
                  :pretty-print false
-                 :source-map "resources/public/javascripts/app.js.map"}}]})
+                 :source-map "resources/public/javascripts/app.js.map"}}
+               :test
+               {:source-paths ["test/cljs"]
+                :notify-command ["phantomjs" :cljs.test/runner "test/javascripts/tests.js"]
+                :compiler
+                {:output-to "test/javascripts/tests.js"
+                 :optimizations :whitespace
+                 :pretty-print true}}}
+              ;;:test-commands {"unit-tests" ["phantomjs" :runner "test/javascripts/tests.js"]}
+              })

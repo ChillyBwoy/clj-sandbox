@@ -1,23 +1,20 @@
 (ns sandbox.lib.geom.particle
-  (:require [sandbox.lib.geom.vector2d :as v2]))
+  (:require [sandbox.lib.geom.vector2d :refer [vector2d add]]))
 
+(enable-console-print!)
 
 (defn particle
-  ([]
-   (particle (v2/vector2d 0 0) (v2/vector2d 0 0) (v2/vector2d 0 0)))
-  ([pos]
-   (particle pos (v2/vector2d 0 0) (v2/vector2d 0 0)))
-  ([pos velocity]
-   (particle pos velocity (v2/vector2d 0 0) "#FFF"))
+  ([] (particle (vector2d) (vector2d) (vector2d)))
+  ([pos] (particle pos (vector2d) (vector2d)))
+  ([pos velocity] (particle pos velocity (vector2d)))
   ([pos velocity acceleration]
-   (particle pos velocity acceleration "#FFF"))
-  ([pos velocity acceleration color]
    {:pos pos
     :velocity velocity
     :acceleration acceleration
-    :color color}))
+    :size 2
+    :color "#F0F"}))
 
-(defn move [{:keys [pos velocity acceleration] :as p}]
-  (let [new-velocity (v2/add velocity acceleration)
-        new-pos (v2/add pos new-velocity)]
+(defn move-particle [{:keys [pos velocity acceleration] :as p}]
+  (let [new-velocity (add velocity acceleration)
+        new-pos (add pos new-velocity)]
     (assoc p :velocity new-velocity :pos new-pos)))

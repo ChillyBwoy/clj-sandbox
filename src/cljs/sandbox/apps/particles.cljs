@@ -1,7 +1,7 @@
 (ns sandbox.apps.particles
-  (:require [sandbox.lib.canvas :as canvas])
-  (:use [sandbox.lib.color :only [rand-rgb]]
-        [sandbox.lib.math :only [sqrt]]))
+  (:require [sandbox.lib.canvas :as canvas]
+            [sandbox.lib.color :refer [rand-rgb]]
+            [sandbox.lib.math :refer [sqrt]]))
 
 (enable-console-print!)
 
@@ -10,8 +10,8 @@
 (def max-particles 500)
 (def line-width 2)
 
-(def app-state (atom {:width (.-innerWidth js/window)
-                      :height (.-innerHeight js/window)}))
+(def ^:private app-state (atom {:width (.-innerWidth js/window)
+                                :height (.-innerHeight js/window)}))
 
 
 (defn create-particle []
