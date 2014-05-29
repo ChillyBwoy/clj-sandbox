@@ -2,9 +2,15 @@
 
 (def ^:private app-state (atom {}))
 
+(defn width []
+  (.-innerWidth js/window))
+
+(defn height []
+  (.-innerHeight js/window))
+
 (defn- current-dimensions []
-  {:width (.-innerWidth js/window)
-   :height (.-innerHeight js/window)})
+  {:width (width)
+   :height (height)})
 
 (defn- update-dimensions [canvas width height]
   (set! (.-width canvas) width)

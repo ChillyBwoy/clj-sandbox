@@ -1,5 +1,5 @@
 (ns sandbox.apps.particles
-  (:require [sandbox.lib.canvas :as canvas]
+  (:require [sandbox.lib.canvas :refer [width height] :as canvas]
             [sandbox.lib.color :refer [rand-rgb]]
             [sandbox.lib.math :refer [sqrt]]))
 
@@ -10,21 +10,18 @@
 (def max-particles 500)
 (def line-width 2)
 
-(def ^:private app-state (atom {:width (.-innerWidth js/window)
-                                :height (.-innerHeight js/window)}))
-
 
 (defn create-particle []
-  (let [width (:width @app-state)
-        height (:height @app-state)
-        x (rand width)
-        y (rand height)
+  (let [w (width)
+        h (height)
+        x (rand w)
+        y (rand h)
         color (rand-rgb)]
     {:x x, :y y, :old-x x, :old-y y, :color color}))
 
-(swap! app-state assoc :mouse {:x (* (:width @app-state) 0.5)
-                               :y (* (:height @app-state) 0.5)})
-(swap! app-state assoc :particles (vec (map create-particle (range max-particles))))
+(def ^:private app-state (atom {:mouse {:x (* (width) 0.5)
+                                        :y (* (height) 0.5)}
+                                :particles (vec (map create-particle (range max-particles)))}))
 
 
 (defn integrate [{:keys [x y old-x old-y] :as particle}]
@@ -44,8 +41,9 @@
     (assoc particle :x new-x :y new-y)))
 
 (defn is-visible [x y]
-  (let [{:keys [width height]} @app-state]
-    (and (> x 0) (< x width) (> y 0) (< y height))))
+  (let [w (width)
+        h (height)]
+    (and (> x 0) (< x w) (> y 0) (< y h))))
 
 (defn draw [ctx {:keys [x y old-x old-y color]}]
   (do
@@ -58,8 +56,10 @@
 
 (defn render []
   (.requestAnimationFrame js/window render)
-  (let [{:keys [width height particles mouse]} @app-state]
-    (.clearRect context 0 0 width height)
+  (let [{:keys [particles mouse]} @app-state
+        w (width)
+        h (height)]
+    (.clearRect context 0 0 w h)
     (dotimes [n max-particles]
       (let [particle (nth particles n)
             x (:x mouse)
@@ -73,12 +73,7 @@
   (swap! app-state assoc :mouse {:x (.-clientX event)
                                  :y (.-clientY event)}))
 
-(defn windowresize-handler [event]
-  (let [w (.-innerWidth js/window)
-        h (.-innerHeight js/window)]
-    (swap! app-state assoc :width w :height h)))
 
 (defn ^:export run []
   (.addEventListener js/window "mousemove" mousemove-handler)
-  (.addEventListener js/window "resize" windowresize-handler)
   (render))
