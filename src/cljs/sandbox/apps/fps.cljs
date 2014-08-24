@@ -1,19 +1,15 @@
 (ns sandbox.apps.fps
   (:require [sandbox.lib.canvas :as canvas]
-            [sandbox.lib.geom.vector2d :refer [vector2d]]))
+            [sandbox.lib.geom.vector2d :as v2d]))
 
 
+(def ^:private app-state (atom {:width (.-innerWidth js/window)
+                                :height (.-innerHeight js/window)
+                                :context (canvas/init "display")}))
 
 
-(defn player [{x :x, y :y} direction]
-  {:pos (vector2d x y)
-   :direction direction})
-
-
-(defn world [size]
-  {:size size
-   :wall})
+(defn- render [])
 
 
 (defn ^:export run []
-  )
+  (render))
