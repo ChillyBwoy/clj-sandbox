@@ -1,9 +1,7 @@
 (ns sandbox.lib.geom.emitter
-  (:require [sandbox.lib.geom.vector2d :refer [vector2d get-magnitude get-angle from-angle]]
-            [sandbox.lib.geom.particle :refer [particle]]
+  (:require [sandbox.lib.geom.vector2d :as v2d]
+            [sandbox.lib.geom.point :as point]
             [sandbox.lib.math :refer [PI]]))
-
-(enable-console-print!)
 
 (defn emitter
   ([pos velocity] (emitter pos velocity (/ PI 32) 4))
@@ -15,10 +13,12 @@
     :rate rate
     :color "#999"}))
 
+
 (defn emit-particle [{:keys [pos velocity spread]}]
-  (let [angle (+ (get-angle velocity) (- spread (* (rand) spread 2)))
-        magnitude (get-magnitude velocity)]
-    (particle pos (from-angle angle magnitude))))
+  (let [angle (+ (v2d/get-angle velocity) (- spread (* (rand) spread 2)))
+        magnitude (v2d/get-magnitude velocity)]
+    (point/create pos pos (v2d/from-angle angle magnitude))))
+
 
 (defn emit-particle-range [em]
   (vec (map #(emit-particle em) (range (:rate em)))))
