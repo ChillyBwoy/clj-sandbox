@@ -1,7 +1,7 @@
 (ns sandbox.lib.geom.point
   (:require [sandbox.lib.geom.vector2d :as v2d]))
 
-
+(comment
 (defn create
   ([] (create (v2d/create) (v2d/create) (v2d/create) (v2d/create)))
   ([pos] (create pos (v2d/create) (v2d/create) (v2d/create)))
@@ -22,14 +22,21 @@
     (assoc p :velocity new-velocity :pos new-pos)))
 
 
-(defn integrate [{:keys [x y old-x old-y] :as p} damping]
-  (let [velocity-x (* (- x old-x) damping)
-        velocity-y (* (- y old-y) damping)]
-    (assoc p :x (+ x velocity-x)
-             :y (+ y velocity-y)
-             :old-x x
-             :old-y y)))
+(defn integrate [{:keys [pos old-pos] :as p} damping]
+  (let [velocity-x (* (- (:x pos) (:x old-pos)) damping)
+        velocity-y (* (- (:y pos) (:y old-pos)) damping)]
+    (assoc p :pos (v2d/create velocity-x velocity-y)
+             :old-pos pos)))
+
+
+(defn attract [{:keys [pos] :as p} to-pos]
+  (let [new-pos (v2d/sub to-pos pos)
+        distance (v2d/distance new-pos)
+        x (+ (:x pos) (/ (:x new-pos) distance))
+        y (+ (:y pos) (/ (:y new-pos) distance))]
+    (assoc p :pos (v2d/create x y))))
 
 
 (defn bounce
   [{:keys [pos velocity] :as p} {:keys [width height] :as dim}])
+)

@@ -6,7 +6,7 @@
 
 (enable-console-print!)
 
-
+(comment
 (def ^:private context (canvas/init "display"))
 
 (def ^:private app-state (atom {:width (.-innerWidth js/window)
@@ -46,6 +46,5 @@
     (doseq [p particles]
       (print p))
     (map draw-particle particles)))
-
-(defn ^:export run []
-  (render))
+)
+(defn ^:export run [])

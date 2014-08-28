@@ -17,6 +17,7 @@
                 {:output-dir "resources/public/javascripts/target"
                  :output-to "resources/public/javascripts/app.js"
                  :pretty-print false
+                 ;;:optimizations :whitespace
                  :source-map "resources/public/javascripts/app.js.map"}}
                :test
                {:source-paths ["test/cljs"]
