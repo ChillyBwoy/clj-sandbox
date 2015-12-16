@@ -4,7 +4,7 @@
             [sandbox.lib.geom.vector2d :refer [vector2d]]
             [sandbox.lib.math :refer [sqrt]]))
 
-(def max-particles 1500)
+(def max-particles 1000)
 
 
 (defn- create-particle []
